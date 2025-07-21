@@ -1,0 +1,18 @@
+FROM node:24-slim
+
+LABEL maintainer="Sam Laister <saml@everbit.dev>"
+
+WORKDIR /usr/src/app
+
+# Update
+RUN apt update
+
+# EXPOSE 80
+
+# Copy entrypoint
+COPY ./docker-entrypoint.sh /opt/entrypoint.sh
+RUN chmod +x /opt/entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/opt/entrypoint.sh"]
