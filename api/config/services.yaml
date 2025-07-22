@@ -4,12 +4,12 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    amazon.s3.key:     "4941e4397e0747ecb0f6c965fe9c82ae"
-    amazon.s3.secret:  "e78e74aa13ea4d94b6d79e6efbb944d2"
-    amazon.s3.bucket:  "soundglyph-prod" # .uk-lon-1.katapultobjects.com
-    amazon.s3.region:  "uk-lon-1"
+    amazon.s3.key:     "%env(S3_KEY)%"
+    amazon.s3.secret:  "%env(S3_SECRET)%"
+    amazon.s3.bucket:  "%env(S3_BUCKET)%" # .uk-lon-1.katapultobjects.com
+    amazon.s3.region:  "%env(S3_REGION)%"
     amazon.s3.version: "2006-03-01"
-    amazon.s3.endpoint: "https://uk-lon-1.katapultobjects.com"
+    amazon.s3.endpoint: "%env(S3_ENDPOINT)%"
 
 
 services:
