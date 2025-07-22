@@ -4,12 +4,47 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    amazon.s3.key:     "4941e4397e0747ecb0f6c965fe9c82ae"
+    amazon.s3.secret:  "e78e74aa13ea4d94b6d79e6efbb944d2"
+    amazon.s3.bucket:  "soundglyph-prod" # .uk-lon-1.katapultobjects.com
+    amazon.s3.region:  "uk-lon-1"
+    amazon.s3.version: "2006-03-01"
+    amazon.s3.endpoint: "https://uk-lon-1.katapultobjects.com"
+
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    Aws\S3\S3Client:
+        arguments:
+            - 
+                credentials:
+                    key: '%amazon.s3.key%'
+                    secret: '%amazon.s3.secret%'
+                region: '%amazon.s3.region%'
+                version: '%amazon.s3.version%'
+                endpoint: '%amazon.s3.endpoint%'
+                use_path_style_endpoint: true # Most non-AWS providers require this
+
+    acme.amazon_s3:
+        class: Aws\S3\S3Client
+        factory: [Aws\S3\S3Client, factory]
+        arguments:
+            -
+                credentials: { key: "%amazon.s3.key%", secret: "%amazon.s3.secret%" }
+                region: "%amazon.s3.region%"
+                version: "%amazon.s3.version%"
+
+    acme.imagine.cache.resolver.aws_s3_resolver:
+        class: Liip\ImagineBundle\Imagine\Cache\Resolver\AwsS3Resolver
+        arguments:
+            - "@acme.amazon_s3"
+            - "%amazon.s3.bucket%"
+        tags:
+            - { name: "liip_imagine.cache.resolver", resolver: "aws_s3_resolver" }
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -27,3 +62,7 @@ services:
     App\OpenApi\JwtDecorator:
         decorates: 'api_platform.openapi.factory'
         arguments: [ '@App\OpenApi\JwtDecorator.inner' ]
+
+    App\State\FileProcessor:
+        arguments:
+            $bucket: '%amazon.s3.bucket%'
