@@ -28,7 +28,6 @@ export class AuthenticationApi {
 	 */
 	async login(input: LoginInput) {
 		const data = await this.apiClient.fetchPOST('/auth', input);
-		console.log(data);
 		return data as GenericResponse<LoginResponse>;
 	}
 

@@ -101,8 +101,6 @@ export class ApiClient {
 
 		init = { ...init, headers };
 
-		console.log('init', init);
-
 		for (const m of this.middleware) {
 			init = m(input, init);
 		}
@@ -119,8 +117,6 @@ export class ApiClient {
 
 		try {
 			response = await this.authenticatedResponse(input, init);
-
-			console.log('response', response);
 
 			// if (!response || !response?.ok) {
 			// 	console.log(response);

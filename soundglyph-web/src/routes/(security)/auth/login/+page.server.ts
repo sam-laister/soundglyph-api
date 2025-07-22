@@ -19,7 +19,6 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 export const actions = {
 	login: async ({ cookies, request, locals, url }) => {
 		const data = await request.formData();
-		console.log(data);
 
 		const email = data.get('email')?.toString();
 		const password = data.get('password')?.toString();
@@ -44,7 +43,6 @@ export const actions = {
 			ok,
 			data: loginResponse
 		} = await authApi().login({ email, password });
-		console.log('response', loginResponse);
 
 		if (status.toString().startsWith('4')) {
 			return {
@@ -57,7 +55,6 @@ export const actions = {
 		}
 
 		token = loginResponse?.token;
-		console.log('login token', loginResponse);
 
 		auth(cookies).saveTokens({
 			accessToken: token ?? ''

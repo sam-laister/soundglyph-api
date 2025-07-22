@@ -17,7 +17,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\State\MeProcessor;
+use App\State\MeProvider;
 
 #[ApiResource(
     security: "is_granted('ROLE_USER')",
@@ -32,7 +32,7 @@ use App\State\MeProcessor;
             name: 'me',
             uriTemplate: '/me',
             description: 'Retrieves current user',
-            processor: MeProcessor::class
+            provider: MeProvider::class
         )
     ],
     normalizationContext: ['groups' => ['user:read']],
