@@ -76,8 +76,7 @@
 			isPlaying={$isPlaying}
 			{togglePlay}
 			currentTime={$currentTime}
-			duration={$currentTime.duration}
-			formatTime={(_) => ''}
+			{formatTime}
 		/>
 	{/if}
 </div>

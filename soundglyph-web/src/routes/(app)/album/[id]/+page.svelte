@@ -4,12 +4,16 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { onMount } from 'svelte';
 	import { setCurrentTrack } from '$lib/stores/player';
+	import type { AlbumsComplexResponse } from '@/api/admin/resources/albums-api';
+	import { page } from '$app/state';
 
-	let album: any = $state(null);
+	let album: AlbumsComplexResponse | null = $state(null);
 	let loading = $state(false);
 	let value = $state(0);
 
-	async function loadAlbum(id: any) {
+	const id = page.params.id;
+
+	async function loadAlbum(id: string) {
 		loading = true;
 		album = null;
 		album = await fetchAlbumById(id);
@@ -17,41 +21,16 @@
 	}
 
 	onMount(() => {
-		loadAlbum(1);
+		loadAlbum(id);
 
-		const timer = setTimeout(() => (value = 66), 500);
+		const timer = setTimeout(() => (value = 66), 100);
 		return () => clearTimeout(timer);
 	});
 
-	// The fetchAlbumById function from above
-	function fetchAlbumById(id: any) {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve({
-					id,
-					title: 'Simulated Album',
-					artist: 'Simulated Artist',
-					cover: 'https://upload.wikimedia.org/wikipedia/en/a/af/Drake_-_Views_cover.jpg',
-					year: 2024,
-					tracks: [
-						{
-							id: 1,
-							title: 'Sim Track 1',
-							duration: '3:42',
-							track: 1,
-							cover: 'https://upload.wikimedia.org/wikipedia/en/a/af/Drake_-_Views_cover.jpg'
-						},
-						{
-							id: 2,
-							title: 'Sim Track 2',
-							duration: '4:15',
-							track: 2,
-							cover: 'https://upload.wikimedia.org/wikipedia/en/a/af/Drake_-_Views_cover.jpg'
-						}
-					]
-				});
-			}, 5);
-		});
+	async function fetchAlbumById(id: string) {
+		const response = await fetch(`/api/albums/${id}`);
+		const data = await response.json();
+		return data as AlbumsComplexResponse;
 	}
 
 	function goBack() {

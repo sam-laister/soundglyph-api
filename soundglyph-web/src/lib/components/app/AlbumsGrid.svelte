@@ -1,24 +1,26 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import type { AlbumBasicResponse } from '@/api/admin/resources/albums-api';
+	import { getMediaUrl } from '@/api/admin/resources/media-api';
 	import { Play } from '@lucide/svelte';
-	export let albums: any[] = [];
+	export let albums: AlbumBasicResponse[] = [];
 	export let selectAlbum: (album: any) => void;
 </script>
 
-<div class="container mx-auto rounded-2xl border border-white/10 bg-white/10 p-6">
+<div class="container mx-auto rounded-2xl p-6">
 	<div class="mb-8 flex w-full items-center justify-between">
-		<h1 class="text-4xl font-bold text-foreground">Your Music</h1>
-		<Badge variant="secondary" class="border-white/20 bg-white/10 text-white">
+		<h1 class="text-4xl font-bold text-foreground">Library</h1>
+		<Badge variant="secondary" class="border-gray/10">
 			{albums.length} Albums
 		</Badge>
 	</div>
 	<div
-		class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+		class="border-gray/10 grid grid-cols-2 gap-6 rounded-2xl border p-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
 	>
 		{#each albums as album}
 			<button
 				type="button"
-				class="group cursor-pointer transition-all duration-300 hover:scale-105"
+				class="group aspect-square cursor-pointer transition-all duration-300 hover:scale-105"
 				onclick={() => selectAlbum(album)}
 				onkeydown={(e) => e.key === 'Enter' && selectAlbum(album)}
 			>
@@ -27,7 +29,7 @@
 				>
 					<div class="relative aspect-square overflow-hidden">
 						<img
-							src={album.cover || '/placeholder.svg'}
+							src={getMediaUrl(album.artwork.id) || '/placeholder.svg'}
 							alt={album.title}
 							class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
 						/>
@@ -44,10 +46,10 @@
 							{album.title}
 						</h3>
 						<p class="truncate text-sm text-gray-400">
-							{album.artist}
+							{album.artist.map((artist) => artist.name).join(', ')}
 						</p>
 						<p class="mt-1 text-xs text-gray-500">
-							{album.year}
+							{album.tracks.length} tracks
 						</p>
 					</div>
 				</div>

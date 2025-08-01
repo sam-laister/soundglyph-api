@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { ArrowLeft, Play, Heart, MoreHorizontal } from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
-	export let selectedAlbum: any;
+	import type { AlbumsComplexResponse } from '@/api/admin/resources/albums-api';
+	import { getMediaUrl } from '@/api/admin/resources/media-api';
+	import { formatTime } from '@/stores/player';
+	export let selectedAlbum: AlbumsComplexResponse;
 	export let goBack: () => void;
 	export let playTrack: (track: any, album: any) => void;
 </script>
@@ -13,33 +16,33 @@
 			variant="ghost"
 			onclick={goBack}
 			onkeydown={(e) => e.key === 'Enter' && goBack()}
-			class="mb-6 cursor-pointer text-foreground hover:bg-primary/10"
+			class="text-foreground hover:bg-primary/10 mb-6 cursor-pointer"
 			role="button"
 		>
 			<ArrowLeft class="mr-2 h-4 w-4" />
 			Back to Albums
 		</Button>
 	</div>
-	<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+	<div class="border-gray/10 grid grid-cols-1 gap-8 rounded-2xl border p-6 lg:grid-cols-3">
 		<!-- Album Art -->
 		<div class="lg:col-span-1">
 			<div class="sticky top-6">
 				<div class="aspect-square overflow-hidden rounded-2xl shadow-2xl">
 					<img
-						src={selectedAlbum?.cover || '/placeholder.svg'}
-						alt={selectedAlbum?.title}
+						src={getMediaUrl(selectedAlbum.artwork.id) || '/placeholder.svg'}
+						alt={selectedAlbum.title}
 						class="h-full w-full object-cover"
 					/>
 				</div>
 				<div class="mt-6 text-center">
-					<h1 class="mb-2 text-3xl font-bold text-foreground">
-						{selectedAlbum?.title}
+					<h1 class="text-foreground mb-2 text-3xl font-bold">
+						{selectedAlbum.title}
 					</h1>
 					<p class="mb-1 text-xl text-gray-300">
-						{selectedAlbum?.artist}
+						{selectedAlbum.artist.map((artist) => artist.name).join(', ')}
 					</p>
 					<p class="text-sm text-gray-500">
-						{selectedAlbum?.year} • {selectedAlbum?.tracks.length} tracks
+						{selectedAlbum?.tracks.length} tracks
 					</p>
 				</div>
 			</div>
@@ -64,12 +67,12 @@
 							<Play class="h-6 w-6" />
 						</Button>
 						<div>
-							<h2 class="text-xl font-semibold text-foreground">Play Album</h2>
+							<h2 class="text-foreground text-xl font-semibold">Play Album</h2>
 							<p class="text-sm text-gray-400">Start from the beginning</p>
 						</div>
 					</div>
 				</div>
-				<div class="divide-y divide-border">
+				<div class="divide-border divide-y">
 					{#each selectedAlbum.tracks as track, index}
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
@@ -79,18 +82,19 @@
 							role="button"
 						>
 							<div class="w-8 text-center">
-								<span class="text-gray-400 group-hover:hidden">{track.track}</span>
 								<Play
-									class="mx-auto hidden h-4 w-4 text-foreground group-hover:block"
+									class="text-foreground mx-auto hidden h-4 w-4 group-hover:block"
 								/>
 							</div>
 							<div class="flex-1">
 								<h4
-									class="font-medium text-foreground transition-colors group-hover:text-purple-400"
+									class="text-foreground font-medium transition-colors group-hover:text-purple-400"
 								>
 									{track.title}
 								</h4>
-								<p class="text-sm text-gray-400">{selectedAlbum?.artist}</p>
+								<p class="text-sm text-gray-400">
+									{selectedAlbum?.artist.map((artist) => artist.name).join(', ')}
+								</p>
 							</div>
 							<div class="flex items-center gap-2">
 								<Button
@@ -104,7 +108,7 @@
 									<Heart class="h-4 w-4" />
 								</Button>
 								<span class="w-12 text-right text-sm text-gray-400"
-									>{track.duration}</span
+									>{formatTime(track.duration)}</span
 								>
 								<Button
 									variant="ghost"

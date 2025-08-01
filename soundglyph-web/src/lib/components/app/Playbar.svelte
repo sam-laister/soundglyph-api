@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Pause, Play, Heart, Volume2 } from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
-	export let currentTrack: any;
+	import { getMediaUrl } from '@/api/admin/resources/media-api';
+	import type { TrackBasicResponse } from '@/api/admin/resources/tracks-api';
+	export let currentTrack: TrackBasicResponse;
 	export let isPlaying: boolean;
 	export let togglePlay: () => void;
 	export let currentTime: number;
@@ -15,7 +17,7 @@
 			<div class="mb-4 h-1 w-full rounded-full bg-white/20">
 				<div
 					class="h-1 rounded-full bg-purple-500 transition-all duration-1000"
-					style="width: {currentTrack.duration > 0
+					style="width: {currentTime > 0
 						? (currentTime / currentTrack.duration) * 100
 						: 0}%"
 				></div>
@@ -24,20 +26,22 @@
 				<!-- Track Info -->
 				<div class="flex flex-1 items-center gap-4">
 					<img
-						src={currentTrack.cover || '/placeholder.svg'}
-						alt={currentTrack.title}
+						src={currentTrack?.artwork
+							? getMediaUrl(currentTrack.artwork.id)
+							: '/placeholder.svg'}
+						alt={currentTrack?.title}
 						class="h-12 w-12 rounded-lg object-cover"
 					/>
 					<div class="min-w-0">
 						<h4 class="truncate font-medium text-white">{currentTrack.title}</h4>
 						<p class="truncate text-sm text-gray-400">
-							{currentTrack.artist}
+							{currentTrack?.artist?.map((artist) => artist.name).join(', ')}
 						</p>
 					</div>
 					<Button
 						variant="ghost"
 						size="sm"
-						class="text-gray-400 hover:text-white"
+						class="text-white hover:bg-white/10"
 						onkeydown={(e) => e.key === 'Enter' && console.log('Like track')}
 						role="button"
 					>
@@ -63,9 +67,9 @@
 					</Button>
 				</div>
 				<!-- Volume & Time -->
-				<div class="flex flex-1 items-center justify-end gap-4">
-					<span class="text-sm text-gray-400">
-						{formatTime(currentTime)} / {currentTrack.duration}
+				<div class="flex-2 flex items-center justify-end gap-4">
+					<span class="text-sm text-white">
+						{formatTime(currentTime)} / {formatTime(currentTrack.duration)}
 					</span>
 					<div class="flex items-center gap-2">
 						<Volume2 class="h-4 w-4 text-gray-400" />

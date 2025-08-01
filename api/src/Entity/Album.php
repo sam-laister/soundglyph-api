@@ -7,33 +7,75 @@ use App\Repository\AlbumRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\HttpFoundation\File\File;
+use ApiPlatform\Metadata\ApiProperty;
+use App\State\AlbumProcessor;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
+
 
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['album:read', 'media:read', 'artist:read']],
+    denormalizationContext: ['groups' => ['album:write']],
+    operations: [
+        new GetCollection(),
+        new Post(
+            outputFormats: ['jsonld' => ['application/ld+json']],
+            inputFormats: ['multipart' => ['multipart/form-data']],
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['album:read', 'media:read', 'artist:read', 'track:read']],
+        ),
+        new Patch(
+            processor: AlbumProcessor::class
+        ),
+        new Put(
+            processor: AlbumProcessor::class
+        )
+    ]
+)]
 class Album
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
+    #[Groups(['album:read'])]
+    private ?Uuid $id = null;
 
     /**
      * @var Collection<int, Track>
      */
     #[ORM\ManyToMany(targetEntity: Track::class, inversedBy: 'albums')]
+    #[Groups(['album:read'])]
     private Collection $tracks;
 
     /**
      * @var Collection<int, Artist>
      */
     #[ORM\ManyToMany(targetEntity: Artist::class, inversedBy: 'albums')]
+    #[Groups(['album:read'])]
     private Collection $artist;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $artworkPath = null;
-
     #[ORM\Column(length: 255)]
+    #[Groups(['album:read', 'album:write'])]
     private ?string $title = null;
+
+    #[ApiProperty(openapiContext: ['nullable' => true, 'type' => 'string', 'format' => 'binary'])]
+    #[Groups(['album:write'])]
+    private ?File $file = null;
+
+    #[ORM\ManyToOne(inversedBy: 'albums')]
+    #[Groups(['album:read'])]
+    private ?Media $artwork = null;
 
     public function __construct()
     {
@@ -41,7 +83,7 @@ class Album
         $this->artist = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
@@ -94,18 +136,6 @@ class Album
         return $this;
     }
 
-    public function getArtworkPath(): ?string
-    {
-        return $this->artworkPath;
-    }
-
-    public function setArtworkPath(?string $artworkPath): static
-    {
-        $this->artworkPath = $artworkPath;
-
-        return $this;
-    }
-
     public function getTitle(): ?string
     {
         return $this->title;
@@ -114,6 +144,30 @@ class Album
     public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    public function getFile(): ?File
+    {
+        return $this->file;
+    }
+
+    public function setFile(?File $file): static
+    {
+        $this->file = $file;
+
+        return $this;
+    }
+
+    public function getArtwork(): ?Media
+    {
+        return $this->artwork;
+    }
+
+    public function setArtwork(?Media $artwork): static
+    {
+        $this->artwork = $artwork;
 
         return $this;
     }

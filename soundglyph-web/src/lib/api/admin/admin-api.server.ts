@@ -1,5 +1,8 @@
 import { ApiClient } from "../utils/client.server";
+import { AlbumsApi } from "./resources/albums-api";
+import { ArtistsApi } from "./resources/artist-api";
 import { UserMeApi } from "./resources/current-user/me-api";
+import { TracksApi } from "./resources/tracks-api";
 
 export class AdminApi {
     private apiClient: ApiClient;
@@ -23,5 +26,17 @@ export class AdminApi {
 
     public currentUser() {
         return new UserMeApi(this.apiClient);
+    }
+
+    public albums() {
+        return new AlbumsApi(this.apiClient);
+    }
+
+    public artists() {
+        return new ArtistsApi(this.apiClient);
+    }
+
+    public tracks() {
+        return new TracksApi(this.apiClient);
     }
 }

@@ -118,9 +118,9 @@ export class ApiClient {
 		try {
 			response = await this.authenticatedResponse(input, init);
 
-			// if (!response || !response?.ok) {
-			// 	console.log(response);
-			// }
+			if (!response || !response?.ok) {
+				console.log(response);
+			}
 
 			const data = await response?.json();
 

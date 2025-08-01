@@ -63,6 +63,9 @@ services:
         decorates: 'api_platform.openapi.factory'
         arguments: [ '@App\OpenApi\JwtDecorator.inner' ]
 
-    App\State\FileProcessor:
+    App\Services\BucketService:
         arguments:
             $bucket: '%amazon.s3.bucket%'
+
+    App\Services:
+        autowire: true

@@ -8,29 +8,17 @@ use ApiPlatform\State\ProcessorInterface;
 use Aws\S3\S3Client;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Doctrine\ORM\EntityManagerInterface;
-
+use App\Services\BucketService;
 
 final class FileProcessor implements ProcessorInterface
 {
-    private S3Client $s3Client;
-    private string $bucket;
     private EntityManagerInterface $entityManager;
+    private BucketService $bucketService;
 
-    public function __construct(S3Client $s3Client, string $bucket, EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, BucketService $bucketService)
     {
-        $this->s3Client = $s3Client;
-        $this->bucket = $bucket;
         $this->entityManager = $entityManager;
-    }
-
-    public function uploadAction(UploadedFile $file)
-    {
-        $result = $this->s3Client->putObject([
-            'Bucket' => $this->bucket,
-            'Key'    => $file->getFilename(),
-            'Body'   => $file->getContent(),
-        ]);
-        return $result;
+        $this->bucketService = $bucketService;
     }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
@@ -38,14 +26,13 @@ final class FileProcessor implements ProcessorInterface
 
         $uploadedFile = $data->getFile();
 
-        $result = $this->uploadAction($uploadedFile);
+        $result = $this->bucketService->uploadAction($uploadedFile);
 
         if ($uploadedFile) {
-            $data->setPath($result['ObjectURL']);
+            $data->setPath($result);
             $data->setFile(null);
         }
 
-        // Persist and flush the entity so it gets an ID
         $this->entityManager->persist($data);
         $this->entityManager->flush();
 

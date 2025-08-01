@@ -3,41 +3,41 @@
 namespace App\Repository;
 
 use App\Entity\Media;
+use App\Entity\User;
+use App\Services\BucketService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @extends ServiceEntityRepository<Media>
  */
 class MediaRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private BucketService $bucketService;
+
+    public function __construct(ManagerRegistry $registry, BucketService $bucketService)
     {
         parent::__construct($registry, Media::class);
+        $this->bucketService = $bucketService;
     }
 
-    //    /**
-    //     * @return Media[] Returns an array of Media objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function uploadAndCreate(UploadedFile $file, User $owner, bool $flush = true): Media
+    {
+        // Upload to bucket and get path
+        $path = $this->bucketService->uploadAction($file);
 
-    //    public function findOneBySomeField($value): ?Media
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $media = new Media();
+        $media->setPath($path);
+        $media->setOwner($owner);
+
+        $this->getEntityManager()->persist($media);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+
+        return $media;
+    }
 }

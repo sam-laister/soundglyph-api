@@ -33,6 +33,22 @@ services:
         published: ${HTTP3_PORT:-443}
         protocol: udp
 
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_REGION=us-east-1
+    volumes:
+      - ./data/s3:/data
+    networks:
+      - net
+    command: server /data --console-address ":9001" 
+    restart: unless-stopped
+
   svelte:
     build:
       context: ./soundglyph-web
@@ -49,9 +65,11 @@ services:
   ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-app}
-      # You should definitely change the password in production
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-!ChangeMe!}
       - POSTGRES_USER=${POSTGRES_USER:-app}
     healthcheck:
@@ -70,22 +88,11 @@ services:
     networks:
       - net
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./api/docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
-
-# Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
+      - ./data/postgres:/var/lib/postgresql/data:rw
 
 networks:
   net:
+
 volumes:
   caddy_data:
   caddy_config:
-  ###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
