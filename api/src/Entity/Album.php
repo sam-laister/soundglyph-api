@@ -19,7 +19,7 @@ use ApiPlatform\Metadata\Post;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
-
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
 #[ApiResource(
@@ -30,6 +30,7 @@ use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
         new Post(
             outputFormats: ['jsonld' => ['application/ld+json']],
             inputFormats: ['multipart' => ['multipart/form-data']],
+            processor: AlbumProcessor::class,
         ),
         new Get(
             normalizationContext: ['groups' => ['album:read', 'media:read', 'artist:read', 'track:read']],
@@ -62,7 +63,7 @@ class Album
      * @var Collection<int, Artist>
      */
     #[ORM\ManyToMany(targetEntity: Artist::class, inversedBy: 'albums')]
-    #[Groups(['album:read'])]
+    #[Groups(['album:read', 'album:write'])]
     private Collection $artist;
 
     #[ORM\Column(length: 255)]

@@ -5,8 +5,14 @@ import type { MediaBasicResponse } from "./media-api";
 
 
 // Models
+export interface CreateAlbumInput {
+    title: string;
+    artist: string[];
+    artwork?: string;
+}
+
 export interface UpdateAlbumInput {
-    name: string;
+    title: string;
     file?: File;
 }
 
@@ -35,8 +41,17 @@ export class AlbumsApi {
     /**
      * Create a new album
      */
-    async createAlbum(input: UpdateAlbumInput) {
-        return await this.apiClient.fetchPOST('/albums', input) as GenericResponse<AlbumBasicResponse>;
+    async createAlbum(input: CreateAlbumInput) {
+        const formData = new FormData();
+        formData.append('title', input.title);
+        formData.append('artist', input.artist.join(','));
+        if (input.artwork) {
+            formData.append('artwork', input.artwork);
+        }
+
+        console.log(formData);
+
+        return await this.apiClient.fetchPOSTFormData('/albums', formData) as GenericResponse<AlbumBasicResponse>;
     }
 
     /**

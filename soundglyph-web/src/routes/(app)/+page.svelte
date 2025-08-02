@@ -19,6 +19,10 @@
 
 		goto(`/album/${album.id}`);
 	}
+
+	function onCreateAlbum() {
+		goto('/?modal=create-album');
+	}
 </script>
 
-<AlbumsGrid {albums} {selectAlbum} />
+<AlbumsGrid {albums} {selectAlbum} {onCreateAlbum} />

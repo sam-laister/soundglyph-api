@@ -206,6 +206,18 @@ export class ApiClient {
 		});
 	}
 
+	async fetchPOSTFormData(path: string, data: FormData, searchParams?: URLSearchParams) {
+		const url = this.getUrl(path, searchParams);
+		return await this.jsonResponse(url, {
+			method: 'POST',
+			body: data,
+			headers: {
+				'Content-Type': 'multipart/form-data',
+				Accept: 'application/ld+json'
+			}
+		});
+	}
+
 	async fetchPUT(path: string, data: object, searchParams?: URLSearchParams) {
 		const url = this.getUrl(path, searchParams);
 

@@ -35,7 +35,7 @@ class BucketService
             throw new \InvalidArgumentException('Uploaded file is missing or not readable.');
         }
 
-        $maxSize = 5 * 1024 * 1024;
+        $maxSize = 2 * 1024 * 1024;
         if ($file->getSize() > $maxSize) {
             throw new \InvalidArgumentException('File is too large. Maximum size is 5MB.');
         }

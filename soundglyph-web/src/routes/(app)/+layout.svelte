@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { onNavigate } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { onMount, setContext, type Snippet } from 'svelte';
 	import { authState } from '@/api/auth.client.svelte';
 	import type { LayoutData } from './$types';
 	import Playbar from '$lib/components/app/Playbar.svelte';
+	import CreateAlbumModal from '$lib/components/app/CreateAlbumModal.svelte';
 	import {
 		currentTrack,
 		isPlaying,
@@ -78,5 +81,22 @@
 			currentTime={$currentTime}
 			{formatTime}
 		/>
+	{/if}
+	{#if $page.url.searchParams.get('modal') === 'create-album'}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+		>
+			<div
+				class="bg-background border-border relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border p-6 shadow-lg"
+			>
+				<button
+					onclick={() => goto($page.url.pathname)}
+					class="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+				>
+					×
+				</button>
+				<CreateAlbumModal />
+			</div>
+		</div>
 	{/if}
 </div>

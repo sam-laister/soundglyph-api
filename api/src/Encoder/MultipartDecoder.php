@@ -20,11 +20,23 @@ final class MultipartDecoder implements DecoderInterface
             return null;
         }
 
-        return array_map(static function (string $element) {
-            // Multipart form values will be encoded in JSON.
-            return $element;
-            // return json_decode($element, true, flags: \JSON_THROW_ON_ERROR);
-        }, $request->request->all()) + $request->files->all();
+        return $request->request->all() + $request->files->all();
+
+        // return array_map(static function (string $element) {
+        //     // Multipart form values will be encoded in JSON.
+        //     try {
+        //         $trimmed = trim($element);
+
+        //         if ($trimmed === '' || (!str_starts_with($trimmed, '{') && !str_starts_with($trimmed, '['))) {
+        //             return $element;
+        //         }
+
+        //         return json_decode($element, true, flags: \JSON_THROW_ON_ERROR);
+        //     } catch (\Exception $e) {
+        //         dd($e);
+        //         return $element;
+        //     }
+        // }, $request->request->all()) + $request->files->all();
     }
 
     public function supportsDecoding(string $format): bool
