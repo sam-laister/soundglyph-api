@@ -1,5 +1,8 @@
-# API
+# Soundglyph PHP API
 
-The API will be here.
+WIP!
 
-Refer to the [Getting Started Guide](https://api-platform.com/docs/distribution) for more information.
+### Setup
+
+ - `bin/console lexik:jwt:generate-keypair` to generate the keypair for the JWT authentication.
+ - `bin/console doctrine:fixtures:load` to load the fixtures.
